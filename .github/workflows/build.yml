@@ -1,0 +1,34 @@
+name: Build IPA
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Set up Xcode
+        run: sudo xcode-select -switch /Applications/Xcode.app
+
+      - name: Build
+        run: |
+          xcodebuild -scheme YTLitePlus \
+            -configuration Release \
+            -archivePath $PWD/build/YTLitePlus.xcarchive archive
+
+      - name: Export IPA
+        run: |
+          xcodebuild -exportArchive \
+            -archivePath $PWD/build/YTLitePlus.xcarchive \
+            -exportPath $PWD/build \
+            -exportOptionsPlist ExportOptions.plist
+
+      - name: Upload IPA
+        uses: actions/upload-artifact@v3
+        with:
+          name: YTLitePlus
+          path: build/*.ipa
